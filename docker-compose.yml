@@ -1,0 +1,14 @@
+version: '3'
+services:
+    recipes:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: recipes-api
+        env_file: .env
+        environment:
+            - PORT=$PORT
+        image: recipes-api
+        ports:
+            - "8080:8080"
+        restart: unless-stopped
