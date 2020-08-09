@@ -4,11 +4,34 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
+        command: ["./wait-for.sh", "db:27017", "--", "node", "src/app.js"]
         container_name: recipes-api
+        depends_on:
+            - "db"
         env_file: .env
         environment:
+            - MONGO_DB=$MONGO_DB
+            - MONGO_HOSTNAME=db
+            - MONGO_PASSWORD=$MONGO_PASSWORD
+            - MONGO_PORT=$MONGO_PORT
+            - MONGO_USERNAME=$MONGO_USERNAME
             - PORT=$PORT
+            - SESSION_SECRET=$SESSION_SECRET
         image: recipes-api
         ports:
             - "8080:8080"
         restart: unless-stopped
+    db:
+        container_name: db
+        env_file: .env
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=$MONGO_USERNAME
+            - MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASSWORD
+        image: "mongo:4.0.14"
+        ports:
+            - "27017:27017"
+        volumes:
+            - dbdata:/data/db
+
+volumes:
+    dbdata:

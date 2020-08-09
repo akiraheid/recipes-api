@@ -1,14 +1,7 @@
 # Recipe REST API
 
 The REST API for the recipes application that handles logic for:
-* authentication
-* pantries
-* recipes
 * users
-
-## API definition
-
-API definition can be found in `docs/`.
 
 ## Setting up
 
