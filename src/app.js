@@ -44,6 +44,7 @@ const main = () => {
 	app.use(passport.session())
 
 	// Set routes
+	app.use('/auth', require('./routes/auth'))
 	app.use('/user', require('./routes/user'))
 	app.disable('x-powered-by')
 

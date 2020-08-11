@@ -34,10 +34,10 @@ router.get('/:id', async (req, res) => {
 
 // Create a user account.
 router.post('/', async (req, res) => {
-	if (!req.body.name || !req.body.pass) { return res.sendStatus(400) }
+	if (!req.body.username || !req.body.password) { return res.sendStatus(400) }
 
-	const username = req.body.name
-	const password = req.body.pass
+	const username = req.body.username
+	const password = req.body.password
 
 	const invalidReason = checkPassword(password)
 	if (invalidReason) { return util.send400(res, invalidReason) }

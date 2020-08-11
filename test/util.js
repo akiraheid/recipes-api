@@ -33,7 +33,7 @@ exports.testEndpointWithGarbage = (endpoint) => {
 exports.createTestUser = async () => {
 	const res = await chai.request(URL)
 		.post('/user')
-		.send({ name: testUsername, pass: testUsername })
+		.send({ username: testUsername, password: testUsername })
 
 	return res.status === 200
 }

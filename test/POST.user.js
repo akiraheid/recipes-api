@@ -18,10 +18,10 @@ describe('POST /user', () => {
 	beforeEach('delete test user', util.deleteTestUser)
 	afterEach('delete test user', util.deleteTestUser)
 
-	it('returns 200 with default data when user created', async () => {
+	it('returns 200 with default data and session when user created', async () => {
 		const data = {
-			name: testUsername,
-			pass: 'testtest',
+			username: testUsername,
+			password: 'testtest',
 		}
 		const res = await chai.request(URL)
 			.post('/user')
@@ -37,15 +37,17 @@ describe('POST /user', () => {
 			pantry: [],
 			recipes: [],
 		})
+
+		expect(res).to.have.header('set-cookie')
 	})
 
 	it('returns 400 for passwords less than 8 characters', async () => {
-		const res = await send({ name: testUsername, pass: 'ab' })
+		const res = await send({ username: testUsername, password: 'ab' })
 		expect(res).to.have.status(400)
 	})
 
 	it('returns 400 when no username given', async () => {
-		const res = await send({ pass: 'testtest' })
+		const res = await send({ password: 'testtest' })
 		expect(res).to.have.status(400)
 	})
 
