@@ -13,10 +13,15 @@ exports.deleteUser = async (username) => {
 	return await User.deleteOne({ name: username })
 }
 
-// Get a user's name and recipes.
-exports.getUser = async (username) => {
-	return await User
-		.findOne({ name: username }, 'name recipes pantry')
+// Get the user's private profile data.
+exports.getPrivateProfileData = async (username) => {
+	return await User.findOne({ name: username }, 'name recipes pantry')
+		.populate('recipes', 'name').lean()
+}
+
+// Get the user's public profile data.
+exports.getPublicProfileData = async (username) => {
+	return await User.findOne({ name: username }, 'name recipes')
 		.populate('recipes', 'name').lean()
 }
 

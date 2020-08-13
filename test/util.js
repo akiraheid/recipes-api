@@ -1,8 +1,7 @@
-/*global afterEach, beforeEach, describe, it*/
+/*global afterEach, beforeEach*/
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 
-const expect = chai.expect
 chai.use(chaiHttp)
 
 // Global test URL
@@ -11,24 +10,6 @@ exports.testUrl = URL
 
 const testUsername = 'testtest'
 exports.testUsername = testUsername
-
-// Every endpoint should not respond to garbage data or data that does not
-// match the schema. Send requests on all HTTP methods and ensure there's no
-// response for garbage sent.
-exports.testEndpointWithGarbage = (endpoint) => {
-	describe('Endpoint garbage handling', () => {
-		describe(`${endpoint} recieves GET garbage`, () => {
-			it('should respond with 400', function(done) {
-				chai.request(`${URL}`)
-					.get(endpoint)
-					.end(function(err, res) {
-						expect(res).to.have.status(404)
-						done()
-					})
-			})
-		})
-	})
-}
 
 exports.createTestUser = async () => {
 	const res = await chai.request(URL)
@@ -40,6 +21,17 @@ exports.createTestUser = async () => {
 
 exports.deleteTestUser = async () => {
 	await exports.deleteUser(testUsername)
+}
+
+exports.createAgent = () => {
+	return chai.request.agent(URL)
+}
+
+exports.createUser = async (username, agent) => {
+	const req = agent || chai.request(URL)
+
+	return await req.post('/user')
+		.send({ username: username, password: username })
 }
 
 exports.deleteUser = async (username) => {
@@ -56,4 +48,9 @@ exports.freshTestUserHooks = async () => {
 	afterEach('delete test user', async () => {
 		await exports.deleteTestUser()
 	})
+}
+
+exports.loginAsUser = async (agent, username) => {
+	return await agent.post('/auth/login')
+		.send({ username: username, password: username })
 }

@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const db = require('../db')
+const passport = require('../passport')
 const util = require('../util')
 
 // Return an error string that describes the problem with the given password;
@@ -21,12 +22,24 @@ router.delete('/:id', async (req, res) => {
 	res.sendStatus(400)
 })
 
+// Get private information about a user
+router.get('/:id', passport.isAuthenticated, async (req, res, next) => {
+	const username = req.params.id
+
+	// Requesting another user's data. Forward onto public route
+	if (username !== req.user.name) { return next('route') }
+
+	const data = await db.getPrivateProfileData(username)
+	if (data) { return util.send200(res, data) }
+
+	return res.sendStatus(400)
+})
+
 // Get public information about a user.
 router.get('/:id', async (req, res) => {
 	const username = req.params.id
-	if (!username) { return res.sendStatus(400) }
 
-	const data = await db.getUser(username)
+	const data = await db.getPublicProfileData(username)
 	if (data) { return util.send200(res, data) }
 
 	return res.sendStatus(400)
@@ -49,7 +62,7 @@ router.post('/', async (req, res) => {
 		if (err) { return util.send500(res) }
 
 		// recipes doesn't need to be populated because it's an empty list
-		const data = await db.getUser(req.user.name)
+		const data = await db.getPrivateProfileData(req.user.name)
 
 		return util.send200(res, data)
 	})

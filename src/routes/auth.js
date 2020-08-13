@@ -17,7 +17,7 @@ router.post('/login', (req, res, next) => {
 				.findById(user._id, 'name recipes pantry')
 				.populate('recipes', 'name').lean()
 
-			return res.status(200).json(data).end()
+			return util.send200(res, data)
 		})
 	})(req, res, next)
 })

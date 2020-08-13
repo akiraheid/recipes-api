@@ -26,8 +26,8 @@ passport.use(new LocalStrategy(async (name, password, done) => {
 	})
 }))
 
-// Login required middleware
+// Middleware to check if the user is logged in. If not, move on to the next route
 exports.isAuthenticated = (req, res, next) => {
 	if (req.isAuthenticated()) { return next() }
-	return res.status(401).end()
+	next('route')
 }
