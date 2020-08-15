@@ -15,7 +15,7 @@ const send = async (path) => {
 }
 
 describe('GET /user/:id unauthenticated', () => {
-	util.freshTestUserHooks()
+	util.freshUserHooks()
 
 	it('returns 200 with public user data when user exists', async () => {
 		const res = await send(`/user/${testUsername}`)
@@ -33,7 +33,6 @@ describe('GET /user/:id unauthenticated', () => {
 
 	it('returns 400 when user doesn\'t exist', async () => {
 		const nonExistentUser = 'idunexisthurhur'
-		await util.deleteUser(nonExistentUser)
 		const res = await send(`/user/${nonExistentUser}`)
 
 		expect(res).to.have.status(400)
@@ -41,26 +40,28 @@ describe('GET /user/:id unauthenticated', () => {
 })
 
 describe('GET /user/:id authenticated but not owner', () => {
-	let agent = undefined
 	const otherUser = 'otheruser'
 
-	util.freshTestUserHooks()
+	util.freshUserHooks()
 
-	beforeEach(async () => {
+	let agent = undefined
+
+	beforeEach('create other user', async () => {
 		agent = util.createAgent()
-		await util.createUser(otherUser)
+		await util.deleteUser(otherUser)
+		const res = await agent.post('/user')
+			.send({ username: otherUser, password: otherUser })
+
+		expect(res).to.have.status(200)
 	})
 
-	afterEach(async () => {
-		await util.deleteUser(otherUser)
+	afterEach('delete other user', async () => {
 		agent.close()
+		await util.deleteUser(otherUser)
 	})
 
 	it('returns 200 and user\'s public data', async () => {
-		let res = await util.loginAsUser(agent, testUsername)
-		expect(res).to.have.status(200)
-
-		res = await agent.get(`/user/${otherUser}`)
+		const res = await agent.get(`/user/${testUsername}`)
 
 		expect(res).to.have.status(200)
 		expect(res.body).to.have.property('_id')
@@ -68,7 +69,7 @@ describe('GET /user/:id authenticated but not owner', () => {
 
 		expect(res.body).to.deep.equal({
 			_id: res.body._id,
-			name: otherUser,
+			name: testUsername,
 			recipes: [],
 		})
 	})
@@ -77,21 +78,16 @@ describe('GET /user/:id authenticated but not owner', () => {
 describe('GET /user/:id authenticated and id == user', () => {
 	let agent = undefined
 
-	util.freshTestUserHooks()
-
-	beforeEach('create request agent', async () => {
-		agent = util.createAgent()
-	})
+	util.freshUserHooks()
 
 	afterEach('close request agent', async () => {
 		agent.close()
 	})
 
 	it('returns 200 with private user data when user exists', async () => {
-		let res = await util.loginAsUser(agent, testUsername)
-		expect(res).to.have.status(200)
+		agent = await util.loginAs(testUsername)
 
-		res = await agent.get(`/user/${testUsername}`)
+		const res = await agent.get(`/user/${testUsername}`)
 
 		expect(res).to.have.status(200)
 		expect(res.body).to.have.property('_id')

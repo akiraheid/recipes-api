@@ -1,4 +1,4 @@
-/*global describe, it*/
+/*global afterEach, beforeEach, describe, it*/
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 
@@ -10,23 +10,35 @@ const util = require('./util')
 const URL = util.testUrl
 const testUsername = util.testUsername
 
-const send = async (path) => {
-	return await chai.request(URL).delete(path)
-}
+describe('DELETE /user/:id authenticated', () => {
+	let agent = undefined
 
-describe('DELETE /user/:id', () => {
-	util.freshTestUserHooks()
+	beforeEach(async () => {
+		agent = util.createAgent()
 
-	it('returns 200 for existing user', async function() {
-		const res = await send(`/user/${testUsername}`)
+		await util.deleteUser(testUsername)
+
+		// Create user and store auth token in agent
+		const res = await agent.post('/user')
+			.send({ username: testUsername, password: testUsername })
+
 		expect(res).to.have.status(200)
 	})
 
-	it('returns 400 for non-existent user', async function() {
-		const nonExistentUsername = 'Idontexistnaenae'
-		await util.deleteUser(nonExistentUsername)
+	afterEach(async () => { agent.close() })
 
-		const res = await send(`/user/${nonExistentUsername}`)
-		expect(res).to.have.status(400)
+	it('returns 200 for existing user', async () => {
+		const res = await agent.delete(`/user/${testUsername}`)
+		expect(res).to.have.status(200)
+	})
+})
+
+describe('DELETE /user/:id unauthenticated', () => {
+	it('returns 401', async () => {
+		const nonExistentUsername = 'Idontexistnaenae'
+		const res = await chai.request(URL)
+			.delete(`/user/${nonExistentUsername}`)
+
+		expect(res).to.have.status(401)
 	})
 })

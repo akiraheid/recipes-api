@@ -11,16 +11,26 @@ const checkPassword = (pass) => {
 	return pass.length < 8 ? 'Password must be at least 8 characters' : null
 }
 
-// Delete a user
-router.delete('/:id', async (req, res) => {
+// Authenticated user delete
+router.delete('/:id', passport.isAuthenticated, async (req, res, next) => {
 	const username = req.params.id
-	if (!username) { return res.sendStatus(400) }
+	const authUser = req.user.name
 
+	// Attempt to delete another user's account
+	if (username !== authUser) {
+		console.warn(`User ${authUser} tried to delete user ${username}`)
+		return next('route')
+	}
+
+	// User could have been deleted by another request. Just check that there
+	// were no database errors
 	const deleted = await db.deleteUser(username)
-	if (deleted.n === 1) { return res.sendStatus(200) }
-
-	res.sendStatus(400)
+	if (!deleted.ok) { console.error(`Error deleting user ${username}`) }
+	res.sendStatus(200)
 })
+
+// Unauthorized user delete
+router.delete('/:id', (req, res) => { res.sendStatus(401) })
 
 // Get private information about a user
 router.get('/:id', passport.isAuthenticated, async (req, res, next) => {

@@ -9,7 +9,10 @@ const util = require('../util')
 router.post('/login', (req, res, next) => {
 	passport.authenticate('local', (err, user, _) => {
 		if (err) { return next(err) }
-		if (!user) { return util.send400(res, 'Invalid username or password') }
+		if (!user) {
+			console.warn(`Failed login attempt for user ${req.body.username}`)
+			return util.send400(res, 'Invalid username or password')
+		}
 
 		req.login(user, async (err) => {
 			if (err) { return next(err) }

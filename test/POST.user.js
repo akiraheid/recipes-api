@@ -15,14 +15,16 @@ const send = async (data) => {
 }
 
 describe('POST /user', () => {
-	beforeEach('delete test user', util.deleteTestUser)
-	afterEach('delete test user', util.deleteTestUser)
+	beforeEach('delete test user', async () => {
+		await util.deleteUser(testUsername)
+	})
 
-	it('returns 200 with default data and session when user created', async () => {
-		const data = {
-			username: testUsername,
-			password: 'testtest',
-		}
+	afterEach('delete test user', async () => {
+		await util.deleteUser(testUsername)
+	})
+
+	it('returns 200 with data and session when user created', async () => {
+		const data = { username: testUsername, password: testUsername }
 		const res = await chai.request(URL)
 			.post('/user')
 			.send(data)
@@ -52,7 +54,7 @@ describe('POST /user', () => {
 	})
 
 	it('returns 400 when no password given', async () => {
-		const res = await send({ name: util.testUsername })
+		const res = await send({ username: util.testUsername })
 		expect(res).to.have.status(400)
 	})
 
