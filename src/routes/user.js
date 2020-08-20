@@ -12,15 +12,8 @@ const checkPassword = (pass) => {
 }
 
 // Authenticated user delete
-router.delete('/:id', passport.isAuthenticated, async (req, res, next) => {
-	const username = req.params.id
-	const authUser = req.user.name
-
-	// Attempt to delete another user's account
-	if (username !== authUser) {
-		console.warn(`User ${authUser} tried to delete user ${username}`)
-		return next('route')
-	}
+router.delete('/', passport.isAuthenticated, async (req, res) => {
+	const username = req.user.name
 
 	// User could have been deleted by another request. Just check that there
 	// were no database errors
@@ -30,7 +23,7 @@ router.delete('/:id', passport.isAuthenticated, async (req, res, next) => {
 })
 
 // Unauthorized user delete
-router.delete('/:id', (req, res) => { res.sendStatus(401) })
+router.delete('/', (req, res) => { res.sendStatus(401) })
 
 // Get private information about a user
 router.get('/:id', passport.isAuthenticated, async (req, res, next) => {

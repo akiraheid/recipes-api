@@ -35,7 +35,7 @@ exports.deleteUser = async (username) => {
 	const loginRes = await agent.post('/auth/login')
 		.send({ username: username, password: username })
 
-	const res = await agent.delete(`/user/${username}`)
+	const res = await agent.delete('/user')
 	agent.close()
 
 	expect(loginRes).to.have.status(200)
