@@ -4,6 +4,7 @@ const passport = require('passport')
 
 const User = require('../models/User')
 
+const localPassport = require('../passport')
 const util = require('../util')
 
 router.post('/login', (req, res, next) => {
@@ -25,9 +26,15 @@ router.post('/login', (req, res, next) => {
 	})(req, res, next)
 })
 
-router.post('/logout', (req, res) => {
+// Authenticated
+router.post('/logout', localPassport.isAuthenticated, (req, res) => {
 	req.logout()
 	return res.sendStatus(200)
+})
+
+// Unauthenticated request to logout
+router.post('/logout', (req, res) => {
+	return res.sendStatus(400)
 })
 
 module.exports = router

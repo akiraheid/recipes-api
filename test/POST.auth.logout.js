@@ -9,7 +9,7 @@ const util = require('./util')
 
 const testUsername = util.testUsername
 
-describe('POST /auth/logout', () => {
+describe('POST /auth/logout authenticated', () => {
 	let agent = undefined
 
 	util.freshUserHooks()
@@ -28,5 +28,22 @@ describe('POST /auth/logout', () => {
 
 		res = await agent.post('/auth/logout')
 		expect(res).to.have.status(200)
+	})
+})
+
+describe('POST /auth/logout unauthenticated', () => {
+	let agent = undefined
+
+	util.freshUserHooks()
+
+	beforeEach('create request agent', async () => {
+		agent = util.createAgent()
+	})
+
+	afterEach('close request agent', async () => { agent.close() })
+
+	it('returns 400', async () => {
+		const res = await agent.post('/auth/logout')
+		expect(res).to.have.status(400)
 	})
 })
