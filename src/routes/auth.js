@@ -2,8 +2,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 
-const User = require('../models/User')
-
+const db = require('../db')
 const localPassport = require('../passport')
 const util = require('../util')
 
@@ -17,10 +16,7 @@ router.post('/login', (req, res, next) => {
 
 		req.login(user, async (err) => {
 			if (err) { return next(err) }
-			const data = await User
-				.findById(user._id, 'name recipes pantry')
-				.populate('recipes', 'name').lean()
-
+			const data = await db.getPrivateProfileData(user.name)
 			return util.send200(res, data)
 		})
 	})(req, res, next)
