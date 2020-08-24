@@ -12,9 +12,45 @@ exports.testUrl = URL
 const testUsername = 'testtest'
 exports.testUsername = testUsername
 
+// Add recipe to user.
+exports.addRecipe = async (username, recipe) => {
+	const agent = exports.createAgent()
+	const loginRes = await agent.post('/auth/login')
+		.send({ username: username, password: username })
+
+	const recipeSend = recipe || exports.createRecipe()
+	const res = await agent.post('/recipe').send(recipeSend)
+	agent.close()
+
+	expect(loginRes).to.have.status(200)
+	expect(res).to.have.status(200)
+}
+
 // Creates and returns a Chai HTTP request agent.
 exports.createAgent = () => {
 	return chai.request.agent(URL)
+}
+
+// Return an ingredient object.
+exports.createIngredient = () => {
+	return {
+		name: 'ingredient',
+		amount: 1,
+		unit: 'oz',
+		prep: 'prep',
+		note: 'note'
+	}
+}
+
+// Return a recipe object.
+exports.createRecipe = () => {
+	const ingredient = exports.createIngredient()
+	return {
+		name: 'recipe',
+		servings: 4,
+		ingredients: [ingredient, ingredient],
+		directions: ['Put the lime in the coconut.', 'Drank \'em both up.']
+	}
 }
 
 // Create a user with the specified username. The password is the same as the
@@ -55,6 +91,20 @@ exports.freshUserHooks = async () => {
 	})
 }
 
+// Send a GET request to the the given path and return the response.
+exports.get = async (path) => {
+	return await chai.request(URL).get(path)
+}
+
+// Get the recipes for a user.
+exports.getRecipes = async (username) => {
+	const res = await exports.get(`/user/${username}`)
+	expect(res).to.have.status(200)
+	expect(res).to.have.property('body')
+	expect(res.body).to.have.property('recipes')
+	return res.body.recipes
+}
+
 // Login as username. Returns an agent used in the login process for the auth
 // token it holds.
 exports.loginAs = async (username) => {
@@ -68,6 +118,6 @@ exports.loginAs = async (username) => {
 
 // Boolean returned for if the user exists.
 exports.userExists = async (username) => {
-	const res = await chai.request(URL).get(`/user/${username}`)
+	const res = await exports.get(`/user/${username}`)
 	return res.status === 200
 }

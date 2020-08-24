@@ -1,7 +1,5 @@
-const User = require('./models/User')
-
-// eslint-disable-next-line no-unused-vars
 const Recipe = require('./models/Recipe')
+const User = require('./models/User')
 
 // Create a new user and return an error if creating the user failed.
 exports.createUser = async (username, password) => {
@@ -23,6 +21,16 @@ exports.getPrivateProfileData = async (username) => {
 exports.getPublicProfileData = async (username) => {
 	return await User.findOne({ name: username }, 'name recipes')
 		.populate('recipes', 'name').lean()
+}
+
+exports.getRecipeById = async (id) => {
+	let recipe = undefined
+
+	try {
+		recipe = await Recipe.findById(id, 'directions ingredients name servings')
+			.populate('ingredients').lean()
+	} catch (err) { console.error(err) }
+	return recipe
 }
 
 // Return if the given username exists.
