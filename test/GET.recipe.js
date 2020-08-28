@@ -43,8 +43,8 @@ describe('GET /recipe/:id', () => {
 		expect(res.body.servings).to.equal(defaultRecipe.servings)
 	})
 
-	it('returns 404 when not exist', async () => {
+	it('returns 400 when not exist', async () => {
 		const res = await util.get('/recipe/12345678901234567890abcd')
-		expect(res).to.have.status(404)
+		expect(res).to.have.status(400)
 	})
 })

@@ -8,7 +8,34 @@ const db = require('../db')
 const passport = require('../passport')
 const util = require('../util')
 
-// Authenticated recipe post
+// Authenticated request to delete a recipe.
+router.delete('/:id', passport.isAuthenticated, async (req, res) => {
+	const recipeId = req.params.id
+
+	const recipeOwner = await db.getRecipeOwner(recipeId)
+	if (!recipeOwner || recipeOwner.name !== req.user.name) {
+		return util.send400(res)
+	}
+
+	const deleted = await db.deleteRecipe(recipeId)
+	if (!deleted.ok) { return util.send500(res) }
+	return util.send200(res)
+})
+
+// Unauthenticated requests
+router.delete('/:id', async (_, res) => { res.sendStatus(400) })
+
+// Unauthenticated request for a specific recipe.
+router.get('/:id', async (req, res) => {
+	const id = req.params.id
+
+	const recipe = await db.getRecipeById(id)
+	if (!recipe) { return util.send400(res) }
+
+	return util.send200(res, recipe)
+})
+
+// Authenticated recipe post.
 router.post('/', passport.isAuthenticated, async (req, res) => {
 	const recipe = req.body
 
@@ -47,15 +74,6 @@ router.post('/', passport.isAuthenticated, async (req, res) => {
 	if (!result) { return res.status(500).json({}).end() }
 
 	return res.status(200).json({}).end()
-})
-
-router.get('/:id', async (req, res) => {
-	const id = req.params.id
-
-	const recipe = await db.getRecipeById(id)
-	if (!recipe) { return util.send404(res) }
-
-	return util.send200(res, recipe)
 })
 
 module.exports = router

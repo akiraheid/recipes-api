@@ -23,7 +23,7 @@ router.delete('/', passport.isAuthenticated, async (req, res) => {
 })
 
 // Unauthorized user delete
-router.delete('/', (req, res) => { res.sendStatus(401) })
+router.delete('/', (_, res) => { res.sendStatus(401) })
 
 // Get private information about a user
 router.get('/:id', passport.isAuthenticated, async (req, res, next) => {

@@ -6,6 +6,26 @@ exports.createUser = async (username, password) => {
 	return await User.create({ name: username, password: password })
 }
 
+// Delete a recipe and remove it from the user that owns it
+exports.deleteRecipe = async (id) => {
+	let deleted = {}
+	try {
+		const user = await exports.getRecipeOwner(id)
+
+		// No user owns the recipe
+		if (!user) { return deleted }
+
+		const updated = await User.updateOne(
+			{ _id: user._id },
+			{ $pull: { recipes: id } },
+		)
+		if (!updated.ok) { return deleted }
+
+		deleted = await Recipe.deleteOne({_id: id})
+	} catch (err) { console.error(err) }
+	return deleted
+}
+
 // Delete a user
 exports.deleteUser = async (username) => {
 	return await User.deleteOne({ name: username })
@@ -31,6 +51,16 @@ exports.getRecipeById = async (id) => {
 			.populate('ingredients').lean()
 	} catch (err) { console.error(err) }
 	return recipe
+}
+
+// Return the User Object that owns the recipe.
+exports.getRecipeOwner = async (id) => {
+	let user = undefined
+
+	try {
+		user = await User.findOne({ recipes: id }).lean()
+	} catch (err) { console.error(err) }
+	return user
 }
 
 // Return if the given username exists.

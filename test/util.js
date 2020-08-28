@@ -63,6 +63,26 @@ exports.createUser = async (username) => {
 	expect(res).to.have.status(200)
 }
 
+// Send a DELETE request to the the given path and return the response.
+exports.delete = async (path) => {
+	return await chai.request(URL).delete(path)
+}
+
+// Delete a recipe owned by a user if it exists.
+exports.deleteRecipe = async (id, username) => {
+	if (!(await exports.recipeExists(id))) { return }
+
+	const agent = exports.createAgent()
+	const loginRes = await agent.post('/auth/login')
+		.send({ username: username, password: username })
+
+	const res = await agent.delete(`/recipe/${id}`)
+	agent.close()
+
+	expect(loginRes).to.have.status(200)
+	expect(res).to.have.status(200)
+}
+
 // Delete a user if it exists.
 exports.deleteUser = async (username) => {
 	if (!(await exports.userExists(username))) { return }
@@ -114,6 +134,12 @@ exports.loginAs = async (username) => {
 
 	if (res.status !== 200) { console.error(`Failed to login as ${username}`) }
 	return agent
+}
+
+// Return boolean for if the recipe exists.
+exports.recipeExists = async (id) => {
+	const res = await exports.get(`/recipe/${id}`)
+	return res.status === 200
 }
 
 // Boolean returned for if the user exists.
