@@ -22,10 +22,10 @@ router.delete('/:id', passport.isAuthenticated, async (req, res) => {
 	return util.send200(res)
 })
 
-// Unauthenticated requests
+// Unauthenticated DELETE requests
 router.delete('/:id', async (_, res) => { res.sendStatus(400) })
 
-// Unauthenticated request for a specific recipe.
+// Unauthenticated GET request for a specific recipe.
 router.get('/:id', async (req, res) => {
 	const id = req.params.id
 
@@ -75,5 +75,8 @@ router.post('/', passport.isAuthenticated, async (req, res) => {
 
 	return res.status(200).json({}).end()
 })
+
+// Unauthenticated POST requests
+router.post('/', async (_, res) => { res.sendStatus(400) })
 
 module.exports = router

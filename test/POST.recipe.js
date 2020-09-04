@@ -34,4 +34,9 @@ describe('POST /recipe authenticated', () => {
 })
 
 describe('POST /recipe unauthenticated', () => {
+	it('returns 400', async () => {
+		const data = util.createRecipe()
+		const res = await util.post('/recipe', data)
+		expect(res).to.have.status(400)
+	})
 })

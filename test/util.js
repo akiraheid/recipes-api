@@ -136,6 +136,11 @@ exports.loginAs = async (username) => {
 	return agent
 }
 
+// Alias for chai's POST.
+exports.post = async (path, data) => {
+	return await chai.request(URL).post(path).send(data)
+}
+
 // Return boolean for if the recipe exists.
 exports.recipeExists = async (id) => {
 	const res = await exports.get(`/recipe/${id}`)
