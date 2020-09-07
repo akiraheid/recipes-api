@@ -45,6 +45,7 @@ const main = () => {
 
 	// Set routes
 	app.use('/auth', require('./routes/auth'))
+	app.use('/pantry', require('./routes/pantry'))
 	app.use('/recipe', require('./routes/recipe'))
 	app.use('/user', require('./routes/user'))
 	app.disable('x-powered-by')

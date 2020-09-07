@@ -12,6 +12,20 @@ exports.testUrl = URL
 const testUsername = 'testtest'
 exports.testUsername = testUsername
 
+// Add a pantry item to a user.
+exports.addPantryItem = async (username, item) => {
+	const agent = exports.createAgent()
+	const loginRes = await agent.post('/auth/login')
+		.send({ username: username, password: username })
+
+	const itemSend = item || exports.createPantryItem()
+	const res = await agent.post('/pantry').send(itemSend)
+	agent.close()
+
+	expect(loginRes).to.have.status(200)
+	expect(res).to.have.status(200)
+}
+
 // Add recipe to user.
 exports.addRecipe = async (username, recipe) => {
 	const agent = exports.createAgent()
@@ -42,6 +56,11 @@ exports.createIngredient = () => {
 	}
 }
 
+// Return a pantry item object.
+exports.createPantryItem = () => {
+	return { amount: 1, name: 'test item', unit: 'g' }
+}
+
 // Return a recipe object.
 exports.createRecipe = () => {
 	const ingredient = exports.createIngredient()
@@ -66,6 +85,20 @@ exports.createUser = async (username) => {
 // Send a DELETE request to the the given path and return the response.
 exports.delete = async (path) => {
 	return await chai.request(URL).delete(path)
+}
+
+// Delete a pantry item.
+exports.deletePantryItem = async (username, itemId) => {
+	const agent = exports.createAgent()
+	const loginRes = await agent.post('/auth/login')
+		.send({ username: username, password: username })
+
+	const res = await agent.delete(`/pantry/${itemId}`)
+
+	agent.close()
+
+	expect(loginRes).to.have.status(200)
+	expect(res).to.have.status(200)
 }
 
 // Delete a recipe owned by a user if it exists.
@@ -116,6 +149,24 @@ exports.get = async (path) => {
 	return await chai.request(URL).get(path)
 }
 
+// Get the given user's pantry.
+exports.getPantry = async (username) => {
+	const exists = await exports.userExists(username)
+	expect(exists).to.equal(true)
+
+	const agent = exports.createAgent()
+	const loginRes = await agent.post('/auth/login')
+		.send({ username: username, password: username })
+
+	const res = await agent.get('/pantry')
+	agent.close()
+
+	expect(loginRes).to.have.status(200)
+	expect(res).to.have.status(200)
+	expect(res).to.have.property('body')
+	return res.body
+}
+
 // Get the recipes for a user.
 exports.getRecipes = async (username) => {
 	const res = await exports.get(`/user/${username}`)
@@ -145,6 +196,19 @@ exports.post = async (path, data) => {
 exports.recipeExists = async (id) => {
 	const res = await exports.get(`/recipe/${id}`)
 	return res.status === 200
+}
+
+// Update itemId with new contents item.
+exports.updatePantryItem = async (username, item) => {
+	const agent = exports.createAgent()
+	const loginRes = await agent.post('/auth/login')
+		.send({ username: username, password: username })
+
+	const res = await agent.post('/pantry').send(item)
+
+	agent.close()
+	expect(loginRes).to.have.status(200)
+	expect(res).to.have.status(200)
 }
 
 // Boolean returned for if the user exists.

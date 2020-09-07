@@ -39,3 +39,14 @@ exports.send404 = (res, data={}) => {
 exports.send500 = (res, data={}) => {
 	res.status(500).json(data).end()
 }
+
+// Return a pantry item Object.
+exports.getPantryItem = (req) => {
+	return {
+		_id: req.body._id,
+		amount: Number(req.body.amount),
+		expire: req.body.expire,
+		name: req.body.name,
+		unit: req.body.unit,
+	}
+}
