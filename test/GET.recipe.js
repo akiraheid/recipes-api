@@ -9,6 +9,37 @@ const util = require('./util')
 
 const testUsername = util.testUsername
 
+describe('GET /recipe?t=xxx', () => {
+	util.freshUserHooks()
+
+	it('returns 200 with array of recipes when matches', async () => {
+		await util.addRecipe(testUsername)
+		const recipes = await util.findRecipes('recipe')
+		expect(recipes).to.have.lengthOf(1)
+
+		const defaultRecipe = util.createRecipe()
+		defaultRecipe.ownerName = testUsername
+
+		const recipe = recipes[0]
+		expect(recipe).to.have.property('_id')
+		delete recipe._id
+
+		// Remove id information to make deep-equal check easier
+		expect(recipe).to.have.property('ownerID')
+		delete recipe.ownerID
+		expect(recipe).to.have.property('ingredients')
+		expect(recipe.ingredients).to.have.lengthOf(2)
+		delete recipe.ingredients[0]._id
+		delete recipe.ingredients[1]._id
+		expect(recipe).to.deep.equal(defaultRecipe)
+	})
+
+	it('returns 200 and empty array when no matches', async () => {
+		const recipes = await util.findRecipes('doesnotexist')
+		expect(recipes).to.have.lengthOf(0)
+	})
+})
+
 describe('GET /recipe/:id', () => {
 	util.freshUserHooks()
 

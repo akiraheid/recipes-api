@@ -94,6 +94,16 @@ exports.getRecipeOwner = async (id) => {
 	return user
 }
 
+// Find recipes that match the given term.
+exports.findRecipes = async (term) => {
+	return await Recipe.find({
+		$or: [
+			{ name: new RegExp(term, 'i') },
+			{ 'ingredients.name': new RegExp(term, 'i') },
+		]
+	}, 'name directions ingredients servings').lean()
+}
+
 // Update an existing pantry item
 exports.updatePantryItem = async (item) => {
 	let success = false

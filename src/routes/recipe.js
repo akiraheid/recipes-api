@@ -25,6 +25,31 @@ router.delete('/:id', passport.isAuthenticated, async (req, res) => {
 // Unauthenticated DELETE requests
 router.delete('/:id', async (_, res) => { res.sendStatus(400) })
 
+// Unauthenticated GET request searching for recipes matching a term.
+router.get('/', async (req, res) => {
+	let term = req.query.t
+
+	// Sanitize string
+	term = term.trim()
+	term = term.replace(/\s+/gi, ' ')
+
+	const ret = []
+	const recipes = await db.findRecipes(term)
+
+	for (const recipe of recipes) {
+		const user = await User.findOne({ 'recipes': recipe._id }, 'name')
+			.lean()
+
+		if (user) {
+			recipe.ownerID = user._id
+			recipe.ownerName = user.name
+			ret.push(recipe)
+		}
+	}
+
+	return util.send200(res, ret)
+})
+
 // Unauthenticated GET request for a specific recipe.
 router.get('/:id', async (req, res) => {
 	const id = req.params.id

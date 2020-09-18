@@ -131,6 +131,14 @@ exports.deleteUser = async (username) => {
 	expect(res).to.have.status(200)
 }
 
+// Find a recipe matching the search term.
+exports.findRecipes = async (term) => {
+	const res = await chai.request(URL).get(`/recipe?t=${term}`)
+	expect(res).to.have.status(200)
+	expect(res).to.have.property('body')
+	return res.body
+}
+
 // Mocha before/afterEach hooks that creates a test user before the test and
 // delete the user after the test.
 exports.freshUserHooks = async () => {
