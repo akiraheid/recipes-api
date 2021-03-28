@@ -4,6 +4,7 @@ pwd:=$(shell pwd)
 pod = $(name)-pod
 db = $(name)-db
 mongoargs = --env-file=.env mongo:4.0.14
+updateContainer = $(name)-lock-update
 
 build: Dockerfile clean
 	cp -n .env.example .env
@@ -31,5 +32,17 @@ stop:
 
 test: lint build build-test
 	bash ./scripts/test.sh $(testname) $(mongoargs)
+
+update-lock: package.json
+	-podman stop ${updateContainer}
+	-podman rm ${updateContainer}
+	podman run \
+		--name ${updateContainer} \
+		-v ${pwd}/package.json:/package.json:ro \
+		-w / \
+		node:10-alpine npm install --package-lock
+	podman cp ${updateContainer}:/package-lock.json .
+	podman stop ${updateContainer}
+	podman rm ${updateContainer}
 
 .PHONY: build clean lint start stop setup
