@@ -18,10 +18,14 @@ Failures indicate that this system is not supported by this repository.
 
 ## Running the app
 
-After cloning the repository, run `make serve` to build and start the container.
+After cloning the repository, run `make configure-db` to set up the initial recipe database.
+
+Run `make start` to build and start the pod.
 
 ```console
-$ make serve
+$ make configure-db
+$ make start
 ...Building output...
-Running at http://localhost:8080 in production mode
 ```
+
+The API will be running at `http://localhost:8080`.

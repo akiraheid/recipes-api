@@ -1,32 +1,35 @@
+name = recipe-api
+testname = $(name)-test
 pwd:=$(shell pwd)
+pod = $(name)-pod
+db = $(name)-db
+mongoargs = --env-file=.env mongo:4.0.14
 
 build: Dockerfile clean
 	cp -n .env.example .env
-	docker build -t recipes-api -f Dockerfile .
+	podman build -t $(name) -f Dockerfile .
 
 build-test: Dockerfile.test
-	docker build -t recipes-api-test -f Dockerfile.test .
+	podman build -t $(testname) -f Dockerfile.test .
 
 clean:
 	-rm -rf node_modules
 
+configure-db:
+	./scripts/configuremongo.sh $(db) $(mongoargs)
+
 lint:
-	docker run --rm -v ${pwd}/:/data/:ro cytopia/eslint .
+	podman run --rm -v ${pwd}/:/data/:ro cytopia/eslint .
 
-serve: build
+start: build
 	cp -n .env.example .env
-	docker-compose up -d
-	echo "App is running!"
+	bash ./scripts/start.sh $(name) $(mongoargs)
 
-serve-down:
-	docker-compose down
+stop:
+	-podman pod stop $(pod)
+	-podman pod rm $(pod)
 
-setup:
-	scripts/setup.sh
-	make test
-	echo "Success!"
+test: lint build build-test
+	bash ./scripts/test.sh $(testname) $(mongoargs)
 
-test: lint build serve build-test
-	docker run --rm --network=host -v ${pwd}/test/:/test/test/:ro recipes-api-test
-
-.PHONY: build clean lint serve setup
+.PHONY: build clean lint start stop setup

@@ -8,7 +8,7 @@ const app = express()
 const mongostore = require('connect-mongo')(session)
 
 const {
-	LISTEN_PORT,
+	PORT,
 	MONGO_DB,
 	MONGO_HOSTNAME,
 	MONGO_PASSWORD,
@@ -27,7 +27,7 @@ const main = () => {
 
 	// Configure app
 	app.set('host', '0.0.0.0')
-	app.set('port', LISTEN_PORT || 8080)
+	app.set('port', PORT || 8080)
 	app.use(express.json())
 	app.use(express.urlencoded())
 	app.use(session({
